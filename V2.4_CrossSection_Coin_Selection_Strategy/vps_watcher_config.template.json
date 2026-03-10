@@ -1,0 +1,8 @@
+{
+  "repo_dir": "/opt/AmethystFlame_Freqtrade_v1",
+  "branch": "main",
+  "watch_files": "freqtrade/user_data/signals/manifest.json,freqtrade/user_data/signals/params_manifest.json",
+  "reload_command": "curl -X POST http://127.0.0.1:8080/api/v1/reload_config",
+  "health_command": "curl -fsS http://127.0.0.1:8080/api/v1/ping",
+  "state_json": "/opt/AmethystFlame_Freqtrade_v1/v2.4_crosssection_coin_selection_strategy/.runtime/vps_watcher_state.json"
+}

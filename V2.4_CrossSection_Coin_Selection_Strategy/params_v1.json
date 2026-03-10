@@ -1,0 +1,75 @@
+{
+  "version": "v1",
+  "generated_at": "2026-03-09T17:56:13.521205+00:00",
+  "latest_synced_ts": "2026-03-09T12:00:00+00:00",
+  "train_window": {
+    "start": "2026-02-07T08:00:00+00:00",
+    "end": "2026-03-09T08:00:00+00:00"
+  },
+  "test_window": {
+    "start": "2026-03-08T12:00:00+00:00",
+    "end": "2026-03-09T08:00:00+00:00"
+  },
+  "models": {
+    "strong": {
+      "params": {
+        "long_vol_4h_min": 0.46519243857777365,
+        "long_breakout_min": -0.17979002624671914,
+        "long_trend_min": 0.3333333333333333,
+        "long_rebound_min": 0.06733298264071541,
+        "short_funding_min": 5e-05,
+        "short_global_min": 0.8594,
+        "short_top_min": null,
+        "long_score_conf": -0.40202218832845915,
+        "short_score_conf": -0.21085575365161352,
+        "short_up_streak_min": 3
+      },
+      "long_weights": {
+        "L1_momo": 0.10155608377111085,
+        "L2_flow": 0.33460670222914024,
+        "L3_confirm": 0.0,
+        "L4_oi": 0.0,
+        "L5_cost": 0.2154155732834486,
+        "L6_rebound": 0.34842164071630033,
+        "L7_candle": 0.0
+      },
+      "short_weights": {
+        "S1_crowd": 0.0,
+        "S2_whale_exit": 0.0,
+        "S3_price_oi_div": 0.0,
+        "S4_activity_oi_div": 1.0,
+        "S5_upper_wick": 0.0
+      }
+    },
+    "weak": {
+      "params": {
+        "long_vol_4h_min": 0.45552023933319835,
+        "long_breakout_min": -0.2123403229693902,
+        "long_trend_min": 0.3333333333333333,
+        "long_rebound_min": 0.046393004615010947,
+        "short_funding_min": 5e-05,
+        "short_global_min": 0.9406,
+        "short_top_min": null,
+        "long_score_conf": -0.3539304716764102,
+        "short_score_conf": -0.20427888045517636,
+        "short_up_streak_min": 3
+      },
+      "long_weights": {
+        "L1_momo": 0.17882843663731038,
+        "L2_flow": 0.36482664925247404,
+        "L3_confirm": 0.0,
+        "L4_oi": 0.0,
+        "L5_cost": 0.2132585472251629,
+        "L6_rebound": 0.2430863668850527,
+        "L7_candle": 0.0
+      },
+      "short_weights": {
+        "S1_crowd": 0.0,
+        "S2_whale_exit": 0.0,
+        "S3_price_oi_div": 0.5991159227221691,
+        "S4_activity_oi_div": 0.2164922670390948,
+        "S5_upper_wick": 0.18439181023873616
+      }
+    }
+  }
+}
