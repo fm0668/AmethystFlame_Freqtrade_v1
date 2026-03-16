@@ -1,5 +1,7 @@
 # live_service 最小可运行骨架
 
+当前版本：v1.1.0
+
 ## 1. 复制配置
 
 将 `config.live.example.yaml` 复制为 `config.live.yaml`，按本机路径或VPS路径调整：
@@ -52,13 +54,15 @@ python -m live_service.app --config .\live_service\config.live.yaml
 一键命令：
 
 ```powershell
-python .\v2.4_crosssection_coin_selection_strategy\run_live_train_and_eval_30d.py
+if (-not (Test-Path .\V2.4_CrossSection_Coin_Selection_Strategy\run_live_train_and_eval_30d.py)) { throw "训练脚本路径不存在，请检查目录大小写" }
+python .\V2.4_CrossSection_Coin_Selection_Strategy\run_live_train_and_eval_30d.py
 ```
 
 兼容旧命令（等价入口）：
 
 ```powershell
-python .\v2.4_crosssection_coin_selection_strategy\run_live_train_30d.py
+if (-not (Test-Path .\V2.4_CrossSection_Coin_Selection_Strategy\run_live_train_30d.py)) { throw "训练脚本路径不存在，请检查目录大小写" }
+python .\V2.4_CrossSection_Coin_Selection_Strategy\run_live_train_30d.py
 ```
 
 ## 6. 实盘信号生成规则
