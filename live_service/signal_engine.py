@@ -8,7 +8,17 @@ import numpy as np
 import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-TRAINING_ROOT = PROJECT_ROOT / "v2.4_crosssection_coin_selection_strategy"
+TRAINING_ROOT = next(
+    (
+        p
+        for p in [
+            PROJECT_ROOT / "V2.4_CrossSection_Coin_Selection_Strategy",
+            PROJECT_ROOT / "v2.4_crosssection_coin_selection_strategy",
+        ]
+        if p.exists()
+    ),
+    PROJECT_ROOT / "V2.4_CrossSection_Coin_Selection_Strategy",
+)
 if str(TRAINING_ROOT) not in sys.path:
     sys.path.insert(0, str(TRAINING_ROOT))
 
