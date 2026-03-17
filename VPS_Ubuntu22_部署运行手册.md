@@ -30,8 +30,8 @@ sudo systemctl status freqtrade_cs --no-pager
 脚本会自动完成以下关键动作：
 
 - 创建 `freqtrade/user_data/strategies` 与 `freqtrade/user_data/signals`
-- 从 `freqtrade策略配置` 自动复制策略与配置到 `freqtrade/user_data`
 - 若 `runtime_pairs.json` 不存在则自动创建默认文件
+- 若配置中仍是占位 API Key，会自动停止 `freqtrade_cs` 并提示你先填写密钥
 
 ---
 
@@ -137,6 +137,19 @@ deactivate
 ls -la /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/strategies
 ls -la /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/signals
 ls -la /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/config_cs_backtest.json
+```
+
+填写交易所密钥（VPS 上编辑）：
+
+```bash
+nano /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/config_cs_backtest.json
+```
+
+把 `exchange.key` 与 `exchange.secret` 从占位符改为你的真实值后再启动：
+
+```bash
+sudo systemctl restart freqtrade_cs
+sudo systemctl status freqtrade_cs --no-pager
 ```
 
 ---

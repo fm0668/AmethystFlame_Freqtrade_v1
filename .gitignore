@@ -6,13 +6,14 @@ __pycache__/
 *.pyd
 .DS_Store
 
-freqtrade/user_data/config_cs_backtest.json
+freqtrade/user_data/config_cs_backtest.local.json
 freqtrade/user_data/data/
 freqtrade/user_data/backtest_results/
 freqtrade/tradesv3.sqlite
 freqtrade/tradesv3.sqlite-shm
 freqtrade/tradesv3.sqlite-wal
-freqtrade/user_data/signals/
+freqtrade/user_data/signals/*
+!freqtrade/user_data/signals/runtime_pairs.json
 
 live_service/data/
 live_service/params/

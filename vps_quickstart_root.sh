@@ -20,11 +20,11 @@ git pull --ff-only
 
 mkdir -p /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/strategies
 mkdir -p /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/signals
-if [ -f "/root/AmethystFlame_Freqtrade_v1/freqtrade策略配置/CrossSectionSignalStrategy.py" ]; then
-  cp -f "/root/AmethystFlame_Freqtrade_v1/freqtrade策略配置/CrossSectionSignalStrategy.py" "/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/strategies/CrossSectionSignalStrategy.py"
+if [ ! -f "/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/strategies/CrossSectionSignalStrategy.py" ]; then
+  echo "缺少策略文件: /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/strategies/CrossSectionSignalStrategy.py"
 fi
-if [ -f "/root/AmethystFlame_Freqtrade_v1/freqtrade策略配置/config_cs_backtest.json" ]; then
-  cp -f "/root/AmethystFlame_Freqtrade_v1/freqtrade策略配置/config_cs_backtest.json" "/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/config_cs_backtest.json"
+if [ ! -f "/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/config_cs_backtest.json" ]; then
+  echo "缺少配置文件: /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/config_cs_backtest.json"
 fi
 if [ ! -f "/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/signals/runtime_pairs.json" ]; then
   cat >/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/signals/runtime_pairs.json <<'EOF'
@@ -90,6 +90,11 @@ systemctl daemon-reload
 systemctl enable live_service
 systemctl enable freqtrade_cs
 systemctl restart live_service
-systemctl restart freqtrade_cs
+if [ -f "/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/strategies/CrossSectionSignalStrategy.py" ] && [ -f "/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/config_cs_backtest.json" ] && ! grep -q "REPLACE_WITH_YOUR_BINANCE_" "/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/config_cs_backtest.json"; then
+  systemctl restart freqtrade_cs
+else
+  systemctl stop freqtrade_cs || true
+  echo "freqtrade_cs 未启动：请确认策略存在、配置存在且已填入真实 Binance API key/secret"
+fi
 systemctl --no-pager --full status live_service || true
 systemctl --no-pager --full status freqtrade_cs || true
