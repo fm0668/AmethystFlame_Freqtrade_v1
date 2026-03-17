@@ -18,6 +18,25 @@ cd /root/AmethystFlame_Freqtrade_v1
 git checkout main
 git pull --ff-only
 
+mkdir -p /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/strategies
+mkdir -p /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/signals
+if [ -f "/root/AmethystFlame_Freqtrade_v1/freqtrade策略配置/CrossSectionSignalStrategy.py" ]; then
+  cp -f "/root/AmethystFlame_Freqtrade_v1/freqtrade策略配置/CrossSectionSignalStrategy.py" "/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/strategies/CrossSectionSignalStrategy.py"
+fi
+if [ -f "/root/AmethystFlame_Freqtrade_v1/freqtrade策略配置/config_cs_backtest.json" ]; then
+  cp -f "/root/AmethystFlame_Freqtrade_v1/freqtrade策略配置/config_cs_backtest.json" "/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/config_cs_backtest.json"
+fi
+if [ ! -f "/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/signals/runtime_pairs.json" ]; then
+  cat >/root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/signals/runtime_pairs.json <<'EOF'
+{
+  "exchange": {
+    "pair_whitelist": ["BTC/USDT:USDT"],
+    "pair_blacklist": []
+  }
+}
+EOF
+fi
+
 python3.11 -m venv /root/AmethystFlame_Freqtrade_v1/.venv_live
 source /root/AmethystFlame_Freqtrade_v1/.venv_live/bin/activate
 pip install -U pip setuptools wheel
@@ -40,7 +59,7 @@ Wants=network-online.target
 Type=simple
 User=root
 WorkingDirectory=/root/AmethystFlame_Freqtrade_v1
-ExecStart=/root/AmethystFlame_Freqtrade_v1/.venv_live/bin/python -m live_service.app --config /root/AmethystFlame_Freqtrade_v1/live_service/config.live.yaml
+ExecStart=/root/AmethystFlame_Freqtrade_v1/.venv_live/bin/python -u -m live_service.app --config /root/AmethystFlame_Freqtrade_v1/live_service/config.live.yaml
 Restart=always
 RestartSec=5
 

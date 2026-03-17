@@ -27,6 +27,12 @@ sudo systemctl status live_service --no-pager
 sudo systemctl status freqtrade_cs --no-pager
 ```
 
+脚本会自动完成以下关键动作：
+
+- 创建 `freqtrade/user_data/strategies` 与 `freqtrade/user_data/signals`
+- 从 `freqtrade策略配置` 自动复制策略与配置到 `freqtrade/user_data`
+- 若 `runtime_pairs.json` 不存在则自动创建默认文件
+
 ---
 
 ## 1. VPS 一次性初始化
@@ -125,6 +131,14 @@ deactivate
 - `margin_mode: isolated`
 - `cs_signal_manifest_file` 与 `cs_params_manifest_file` 保持当前信号目录结构一致
 
+首次安装后可执行以下命令确认文件齐全：
+
+```bash
+ls -la /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/strategies
+ls -la /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/signals
+ls -la /root/AmethystFlame_Freqtrade_v1/freqtrade/user_data/config_cs_backtest.json
+```
+
 ---
 
 ## 5. 首次手动启动（建议先人工验证）
@@ -182,7 +196,7 @@ Wants=network-online.target
 Type=simple
 User=root
 WorkingDirectory=/root/AmethystFlame_Freqtrade_v1
-ExecStart=/root/AmethystFlame_Freqtrade_v1/.venv_live/bin/python -m live_service.app --config /root/AmethystFlame_Freqtrade_v1/live_service/config.live.yaml
+ExecStart=/root/AmethystFlame_Freqtrade_v1/.venv_live/bin/python -u -m live_service.app --config /root/AmethystFlame_Freqtrade_v1/live_service/config.live.yaml
 Restart=always
 RestartSec=5
 
@@ -268,6 +282,51 @@ sudo journalctl -u freqtrade_cs -f
 ```bash
 sudo journalctl -u live_service -n 200 --no-pager
 sudo journalctl -u freqtrade_cs -n 200 --no-pager
+```
+
+## 7.4 tmux 双窗口（不分屏）
+
+创建会话并进入：
+
+```bash
+tmux new -s ops
+```
+
+在窗口 0 运行 live_service 日志：
+
+```bash
+sudo journalctl -u live_service -f
+```
+
+新建窗口 1：
+
+- 先按 `Ctrl+b`，松开后按 `c`
+
+在窗口 1 运行 freqtrade 日志：
+
+```bash
+sudo journalctl -u freqtrade_cs -f
+```
+
+两个窗口切换：
+
+- 下一个窗口：`Ctrl+b` 后按 `n`
+- 上一个窗口：`Ctrl+b` 后按 `p`
+- 指定窗口：`Ctrl+b` 后按 `0` 或 `1`
+
+关闭当前窗口：
+
+- 先按 `Ctrl+c` 停止当前命令
+- 输入 `exit` 回车
+
+断开但保持会话运行：
+
+- 按 `Ctrl+b`，松开后按 `d`
+
+重新进入会话：
+
+```bash
+tmux attach -t ops
 ```
 
 ---
