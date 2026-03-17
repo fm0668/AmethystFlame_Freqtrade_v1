@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schema.freqtrade.io/schema.json",
+  "bot_name": "cs_live_vps",
+  "dry_run": false,
+  "dry_run_wallet": 103,
+  "trading_mode": "futures",
+  "margin_mode": "isolated",
+  "max_open_trades": 10,
+  "stake_currency": "USDT",
+  "stake_amount": "unlimited",
+  "tradable_balance_ratio": 0.99,
+  "fiat_display_currency": "USD",
+  "timeframe": "4h",
+  "dataformat_ohlcv": "feather",
+  "dataformat_trades": "feather",
+  "add_config_files": [
+    "signals/runtime_pairs.json"
+  ],
+  "cs_signal_manifest_file": "signals/manifest.json",
+  "cs_params_manifest_file": "signals/params_manifest.json",
+  "initial_state": "running",
+  "pairlists": [
+    {
+      "method": "StaticPairList"
+    }
+  ],
+  "exchange": {
+    "name": "binance",
+    "offline_mode": false,
+    "key": "REPLACE_WITH_YOUR_BINANCE_KEY",
+    "secret": "REPLACE_WITH_YOUR_BINANCE_SECRET",
+    "ccxt_config": {
+      "enableRateLimit": true,
+      "options": {
+        "adjustForTimeDifference": true,
+        "recvWindow": 10000
+      }
+    },
+    "ccxt_async_config": {
+      "enableRateLimit": true,
+      "options": {
+        "adjustForTimeDifference": true,
+        "recvWindow": 10000
+      }
+    }
+  },
+  "entry_pricing": {
+    "price_side": "same",
+    "use_order_book": true
+  },
+  "exit_pricing": {
+    "price_side": "other",
+    "use_order_book": true
+  }
+}
