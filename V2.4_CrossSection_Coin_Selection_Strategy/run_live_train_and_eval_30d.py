@@ -39,6 +39,7 @@ def main() -> None:
     parser.add_argument("--lookback-days", type=int, default=30)
     parser.add_argument("--test-days", type=int, default=1)
     parser.add_argument("--params-file", default=None)
+    parser.add_argument("--replace-params-file", default=None)
     parser.add_argument("--params-version-prefix", default="train")
     parser.add_argument("--output-prefix", default=None)
     args = parser.parse_args()
@@ -69,8 +70,9 @@ def main() -> None:
     models = derive_regime_model(train)
     test_end = train_end
     test_start = test_end - pd.Timedelta(days=args.test_days) + pd.Timedelta(hours=4)
-    stamp = latest_ts.strftime("%Y%m%d_%H%M")
-    output_prefix = args.output_prefix or f"live_prod_{stamp}"
+    latest_stamp = latest_ts.strftime("%Y%m%d_%H%M")
+    train_stamp = pd.Timestamp.now("UTC").strftime("%Y%m%d_%H%M")
+    output_prefix = args.output_prefix or f"live_prod_{latest_stamp}"
     summary, detail, weights, panel_all = evaluate(
         panel,
         test_start=test_start,
@@ -100,13 +102,13 @@ def main() -> None:
         agg = pd.DataFrame([{}])
     agg.to_csv(root / f"{output_prefix}_aggregate.csv", index=False)
 
-    params_rel = Path(args.params_file) if args.params_file else Path(f"params_{stamp}.json")
+    params_rel = Path(args.params_file) if args.params_file else Path(f"params_{train_stamp}.json")
     if params_rel.is_absolute():
         raise ValueError("params-file 需为相对 params_dir 的路径")
     params_path = (cfg.params_dir / params_rel).resolve()
     params_path.parent.mkdir(parents=True, exist_ok=True)
     params_payload = {
-        "version": f"{args.params_version_prefix}_{stamp}",
+        "version": f"{args.params_version_prefix}_{train_stamp}",
         "generated_at": pd.Timestamp.now("UTC").isoformat(),
         "latest_synced_ts": latest_ts.isoformat(),
         "train_window": {"start": train_start.isoformat(), "end": train_end.isoformat()},
@@ -115,10 +117,20 @@ def main() -> None:
     }
     with open(params_path, "w", encoding="utf-8") as f:
         json.dump(params_payload, f, ensure_ascii=False, indent=2)
+    replaced_path = None
+    if args.replace_params_file:
+        replace_path = Path(args.replace_params_file)
+        if not replace_path.is_absolute():
+            replace_path = (PROJECT_ROOT / replace_path).resolve()
+        replace_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(replace_path, "w", encoding="utf-8") as f:
+            json.dump(params_payload, f, ensure_ascii=False, indent=2)
+        replaced_path = replace_path
     print(
         f"latest_ts={latest_ts.isoformat()} train_start={train_start.isoformat()} "
         f"train_end={train_end.isoformat()} test_start={test_start.isoformat()} "
         f"test_end={test_end.isoformat()} params_out={params_path} "
+        f"params_replaced={replaced_path} "
         f"output_prefix={output_prefix}"
     )
 

@@ -142,32 +142,41 @@ def _latest_timestamped_json(directory: Path, prefix: str) -> Path | None:
 
 
 def _load_runtime_models(cfg: LiveServiceConfig) -> tuple[dict | None, str, str]:
-    params_path = _latest_timestamped_json(cfg.params_dir, "params_")
-    if params_path is None:
-        params_path = (cfg.params_dir / cfg.active_params_file).resolve()
-    if not params_path.exists():
-        return None, cfg.params_version, cfg.active_params_file
-    params_version = cfg.params_version
-    active_params_file = params_path.name
-    params_mtime = params_path.stat().st_mtime
-    if (
-        _PARAMS_CACHE["params_path"] == str(params_path)
-        and _PARAMS_CACHE["params_mtime"] == params_mtime
-        and _PARAMS_CACHE["models"] is not None
-    ):
-        return _PARAMS_CACHE["models"], str(_PARAMS_CACHE["params_version"]), str(_PARAMS_CACHE["active_params_file"])
-    with open(params_path, "r", encoding="utf-8") as f:
-        payload = json.load(f)
-    models = payload.get("models")
-    if not isinstance(models, dict):
-        return None, params_version, active_params_file
-    params_version = str(payload.get("version", params_version))
-    _PARAMS_CACHE["params_path"] = str(params_path)
-    _PARAMS_CACHE["params_mtime"] = params_mtime
-    _PARAMS_CACHE["models"] = models
-    _PARAMS_CACHE["params_version"] = params_version
-    _PARAMS_CACHE["active_params_file"] = active_params_file
-    return models, params_version, active_params_file
+    latest_path = _latest_timestamped_json(cfg.params_dir, "params_")
+    fallback_path = (cfg.params_dir / cfg.active_params_file).resolve()
+    candidates: list[Path] = []
+    if latest_path is not None:
+        candidates.append(latest_path.resolve())
+    if fallback_path not in candidates:
+        candidates.append(fallback_path)
+    for params_path in candidates:
+        if not params_path.exists():
+            continue
+        params_version = cfg.params_version
+        active_params_file = params_path.name
+        params_mtime = params_path.stat().st_mtime
+        if (
+            _PARAMS_CACHE["params_path"] == str(params_path)
+            and _PARAMS_CACHE["params_mtime"] == params_mtime
+            and _PARAMS_CACHE["models"] is not None
+        ):
+            return _PARAMS_CACHE["models"], str(_PARAMS_CACHE["params_version"]), str(_PARAMS_CACHE["active_params_file"])
+        try:
+            with open(params_path, "r", encoding="utf-8") as f:
+                payload = json.load(f)
+        except Exception:
+            continue
+        models = payload.get("models")
+        if not isinstance(models, dict):
+            continue
+        params_version = str(payload.get("version", params_version))
+        _PARAMS_CACHE["params_path"] = str(params_path)
+        _PARAMS_CACHE["params_mtime"] = params_mtime
+        _PARAMS_CACHE["models"] = models
+        _PARAMS_CACHE["params_version"] = params_version
+        _PARAMS_CACHE["active_params_file"] = active_params_file
+        return models, params_version, active_params_file
+    return None, cfg.params_version, cfg.active_params_file
 
 
 def maybe_emit_signals(store: LiveStore, cfg: LiveServiceConfig, symbols: list[str]) -> dict | None:

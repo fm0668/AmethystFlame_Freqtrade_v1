@@ -387,9 +387,10 @@ def evaluate(panel, test_start, test_end, output_prefix, fixed_train_start=None,
             rank = up_map.get(sym, "-")
             ret = float(r["ret_fwd_4h"]) if pd.notna(r["ret_fwd_4h"]) else np.nan
             score = float(r["score_long"])
-            long_mdd = (float(r["next_low"]) / float(r["close"]) - 1) if pd.notna(r["next_low"]) and pd.notna(r["close"]) and float(r["close"]) != 0 else np.nan
+            entry = float(r["close"]) if pd.notna(r["close"]) else np.nan
+            long_mdd = (float(r["next_low"]) / entry - 1) if pd.notna(r["next_low"]) and pd.notna(entry) and entry != 0 else np.nan
             md.append(f"- {sym} | 合成评分: {score:.4f} | 真实涨幅Top30排名: {rank} | 未来4H收益: {ret:.4%} | 未来4H最大回撤: {long_mdd:.4%}")
-            detail.append({"ts": ts, "side": "long", "symbol": sym, "score": score, "real_top30_rank": rank, "ret_fwd_4h": ret, "max_drawdown_4h": long_mdd, "is_hit_top30": int(sym in up_set)})
+            detail.append({"ts": ts, "side": "long", "symbol": sym, "score": score, "real_top30_rank": rank, "ret_fwd_4h": ret, "max_drawdown_4h": long_mdd, "entry_price": entry, "next_high": float(r["next_high"]) if pd.notna(r.get("next_high")) else np.nan, "next_low": float(r["next_low"]) if pd.notna(r.get("next_low")) else np.nan, "is_hit_top30": int(sym in up_set)})
         md.append("")
         md.append(f"### 做空Top{TOP_K}")
         if short_pick.empty:
@@ -399,9 +400,10 @@ def evaluate(panel, test_start, test_end, output_prefix, fixed_train_start=None,
             rank = dn_map.get(sym, "-")
             ret = float(r["ret_fwd_4h"]) if pd.notna(r["ret_fwd_4h"]) else np.nan
             score = float(r["score_short"])
-            short_mdd = (1 - float(r["next_high"]) / float(r["close"])) if pd.notna(r["next_high"]) and pd.notna(r["close"]) and float(r["close"]) != 0 else np.nan
+            entry = float(r["close"]) if pd.notna(r["close"]) else np.nan
+            short_mdd = (1 - float(r["next_high"]) / entry) if pd.notna(r["next_high"]) and pd.notna(entry) and entry != 0 else np.nan
             md.append(f"- {sym} | 合成评分: {score:.4f} | 真实跌幅Top30排名: {rank} | 未来4H收益: {ret:.4%} | 未来4H最大回撤(做空): {short_mdd:.4%}")
-            detail.append({"ts": ts, "side": "short", "symbol": sym, "score": score, "real_top30_rank": rank, "ret_fwd_4h": ret, "max_drawdown_4h": short_mdd, "is_hit_top30": int(sym in dn_set)})
+            detail.append({"ts": ts, "side": "short", "symbol": sym, "score": score, "real_top30_rank": rank, "ret_fwd_4h": ret, "max_drawdown_4h": short_mdd, "entry_price": entry, "next_high": float(r["next_high"]) if pd.notna(r.get("next_high")) else np.nan, "next_low": float(r["next_low"]) if pd.notna(r.get("next_low")) else np.nan, "is_hit_top30": int(sym in dn_set)})
         md.append("")
 
     summary = pd.DataFrame(rows)

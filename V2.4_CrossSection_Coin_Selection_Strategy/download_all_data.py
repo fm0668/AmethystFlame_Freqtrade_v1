@@ -97,6 +97,12 @@ def build_download_tasks(symbols, monthly_months, daily_dates, all_metrics_dates
                 f"{BASE_URL}/monthly/fundingRate/{symbol}/{symbol}-fundingRate-{month}.zip",
                 f"{DATA_DIR}/fundingRate/{symbol}/{symbol}-fundingRate-{month}.zip",
             ))
+        for date in daily_dates:
+            d = date.strftime("%Y-%m-%d")
+            tasks.append((
+                f"{BASE_URL}/daily/fundingRate/{symbol}/{symbol}-fundingRate-{d}.zip",
+                f"{DATA_DIR}/fundingRate/{symbol}/{symbol}-fundingRate-{d}.zip",
+            ))
         for date in all_metrics_dates:
             d = date.strftime("%Y-%m-%d")
             tasks.append((
@@ -144,11 +150,22 @@ def supplement_funding_rate_via_api(symbol, start_date, end_date):
     save_dir = f"{DATA_DIR}/fundingRate/{symbol}"
     os.makedirs(save_dir, exist_ok=True)
     save_path = f"{save_dir}/{symbol}-fundingRate-API_supplement.csv"
-    if os.path.exists(save_path) and os.path.getsize(save_path) > 0:
-        return "skip"
     try:
-        start_ts = int(datetime.strptime(start_date, "%Y-%m-%d").timestamp() * 1000)
+        start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        if os.path.exists(save_path) and os.path.getsize(save_path) > 0:
+            old = pd.read_csv(save_path)
+            if "calc_time" in old.columns and not old.empty:
+                old["calc_time"] = pd.to_numeric(old["calc_time"], errors="coerce")
+                max_old = old["calc_time"].dropna().max()
+                if pd.notna(max_old):
+                    old_dt = datetime.utcfromtimestamp(float(max_old) / 1000.0)
+                    next_dt = old_dt + timedelta(hours=8)
+                    if next_dt > start_dt:
+                        start_dt = next_dt
+        start_ts = int(start_dt.timestamp() * 1000)
         end_ts = int(datetime.strptime(end_date, "%Y-%m-%d").timestamp() * 1000) + 86400000
+        if start_ts >= end_ts:
+            return "skip"
         all_data = []
         current_start = start_ts
         while current_start < end_ts:
@@ -166,7 +183,15 @@ def supplement_funding_rate_via_api(symbol, start_date, end_date):
         df["calc_time"] = df["fundingTime"]
         df["last_funding_rate"] = df["fundingRate"]
         df["funding_interval_hours"] = 8
-        df[["calc_time", "funding_interval_hours", "last_funding_rate"]].to_csv(save_path, index=False)
+        new_df = df[["calc_time", "funding_interval_hours", "last_funding_rate"]].copy()
+        if os.path.exists(save_path) and os.path.getsize(save_path) > 0:
+            old = pd.read_csv(save_path)
+            merged = pd.concat([old, new_df], ignore_index=True)
+            merged["calc_time"] = pd.to_numeric(merged["calc_time"], errors="coerce")
+            merged = merged.dropna(subset=["calc_time"]).drop_duplicates(subset=["calc_time"], keep="last").sort_values("calc_time")
+            merged.to_csv(save_path, index=False)
+        else:
+            new_df.to_csv(save_path, index=False)
         return "ok"
     except Exception:
         return "error"
